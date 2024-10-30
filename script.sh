@@ -2,14 +2,14 @@
 
 read -p "Enter Cloudways email: " email
 read -sp "Enter Cloudways API key: " api_key
-echo # Newline for readability
+echo 
 
 token_url="https://api.cloudways.com/api/v1/oauth/access_token"
 server_url="https://api.cloudways.com/api/v1/server"
 cron_setting_url="https://api.cloudways.com/api/v1/app/manage/cron_setting"
-error_log_file="cron_setting_errors.log"  # File to log error responses
+error_log_file="cron_setting_errors.log"  
 
-# Function to generate a new access token
+
 generate_access_token() {
     echo "Generating access token..."
     response=$(curl -s -X POST "$token_url" \
@@ -25,7 +25,7 @@ generate_access_token() {
     echo "Access token generated successfully."
 }
 
-# Initial token generation
+
 generate_access_token
 
 echo "Retrieving server and app IDs..."
@@ -55,12 +55,12 @@ while IFS= read -r line; do
 
         status=$(echo "$cron_response" | jq -r '.status')
 
-        # Check for "access_denied" error, indicating an expired token
+        
         if [[ "$status" == "null" && $(echo "$cron_response" | jq -r '.error') == "access_denied" ]]; then
             echo "Access token expired. Generating a new token..."
-            generate_access_token  # Refresh the token
+            generate_access_token  
 
-            # Retry the API request with the new token
+            
             cron_response=$(curl -s -X POST "$cron_setting_url" \
                 --header 'Content-Type: application/x-www-form-urlencoded' \
                 --header 'Accept: application/json' \
@@ -70,7 +70,7 @@ while IFS= read -r line; do
             status=$(echo "$cron_response" | jq -r '.status')
         fi
 
-        # Log success or error
+        
         if [[ "$status" == "true" ]]; then
             echo "Successfully enabled cron optimizer for AppID: $app_id on ServerID: $server_id"
         else
